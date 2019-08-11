@@ -12,6 +12,7 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { UserService } from './user/user.service';
 import { GetUser } from './user/get-user.decorator';
@@ -20,8 +21,7 @@ import { ChatEvent } from './models/chat';
 
 @UsePipes(new ValidationPipe())
 @WebSocketGateway(8080, { namespace: 'channels' })
-export class ChannelsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   // id, name
   private channels: Map<string, string> = new Map<string, string>();
 
@@ -30,6 +30,10 @@ export class ChannelsGateway
 
   constructor(@Inject(UserService) private users: UserService) {
     this.channels.set(v4(), 'lobby');
+  }
+
+  public afterInit(server: Server): void {
+    console.log('Gateway ready and listening');
   }
 
   @SubscribeMessage('identify')
