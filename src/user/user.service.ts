@@ -3,11 +3,21 @@ import { User } from './user.type';
 
 @Injectable()
 export class UserService {
+
+  private anonymousCounter: number = 0;
   // client's id to an object
   private users: Map<string, User>;
 
-  public add(clientId: string, obj: User): any {
-    this.users.set(clientId, obj);
+  public add(clientId: string): any {
+    const user = new User();
+    user.name = 'anonymous_' + this.anonymousCounter++;
+    user.id = clientId;
+    user.seen = Date.now();
+    this.users.set(clientId, user);
+  }
+
+  public get(clientId: string): User | null {
+    return this.users.get(clientId) || null;
   }
 
   public remove(clientId: string): void {
@@ -34,7 +44,7 @@ export class UserService {
     }
 
     user.name = newName;
-    this.add(clientId, user);
+    this.users.set(clientId, user);
   }
 
   public updatePresence(clientId: string): void {
@@ -44,6 +54,6 @@ export class UserService {
     }
 
     user.seen = Date.now();
-    this.add(clientId, user);
+    this.users.set(clientId, user);
   }
 }
