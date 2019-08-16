@@ -18,6 +18,7 @@ import { UserService } from './user/user.service';
 import { GetUser } from './user/get-user.decorator';
 import { PeopleEvent } from './models/people';
 import { ChatEvent } from './models/chat';
+import { ListChannelEvent, IChannel } from './models/list-channel';
 
 @UsePipes(new ValidationPipe())
 @WebSocketGateway(8080, { namespace: 'channels' })
@@ -118,8 +119,12 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage('channels')
-  public listChannels(client: Socket, payload: any): Event<string[]> {
-    return { event: 'channels', data: Array.from(this.channels.values()) };
+  public listChannels(client: Socket): ListChannelEvent {
+    const data: IChannel[] = [];
+    for (const [ id, name ] of this.channels.entries()) {
+      data.push({ id, name });
+    }
+    return { event: 'channels', data };
   }
 
   @SubscribeMessage('rename')
